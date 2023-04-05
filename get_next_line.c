@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line_llist.c                              :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/02 09:44:04 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/03 17:53:08 by svikornv         ###   ########.fr       */
+/*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
+/*   Updated: 2023/04/05 17:40:48 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,11 @@ char	*extract_line(t_list *stash)
 		{
 			//break if new line found
 			if (ptr->content[j] == '\n')
+			{	
+				line[i] = ptr->content[j];
+				i++;
 				break ;
+			}
 			//extract content of node to line
 			line[i] = ptr->content[j];
 			i++;
@@ -158,9 +162,10 @@ char	*get_next_line(int fd)
 	int	read_size;
 
 	//if invalid file or BUFFER_SIZE return NULL
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, &line, 0) < 0)
+	if (fd < 0 || fd == 0 || BUFFER_SIZE <= 0 || read(fd, &line, 0))
 		return (NULL);
 	line = NULL;
+	read_size = 0;
 	//loop until end of file (break when new line character found)
 	while (1)
 	{
@@ -170,20 +175,26 @@ char	*get_next_line(int fd)
 			return (NULL);
 		//read continuously
 		read_size = read(fd, buf, BUFFER_SIZE);
+		//null terminate buf
+		buf[BUFFER_SIZE] = '\0';
 		//if end of file
-		if (read_size <= 0)
+		if (read_size <= 0 && stash != NULL)
 		{
 			free(buf);
+			buf = NULL;
 			//extract line from stash
 			line = extract_line(stash);
 			clear_list(&stash);
 			//break off loop to return line
 			break ;
 		}
-		//add_to_stash function stores buf to stash as linked list
+		//store buf to stash as linked list
 		add_to_stash(&stash, buf, read_size);
-		//free buf after stored in stash
+		//free buf after storing
 		free(buf);
+		//if empty file, return
+		if (stash == NULL)
+			return (NULL);
 		if (contain_nl(stash) == 1)
 		{
 			//if new line character is found, extract line from stash up to '\n'
@@ -196,10 +207,30 @@ char	*get_next_line(int fd)
 	}
 		if (line[0] == '\0')
 		{
-			clear_list(&stash);
-			stash = NULL;
+			if (stash != NULL)
+			{
+				clear_list(&stash);
+				stash = NULL;
+			}
 			free(line);
+			line = NULL;
 			return (NULL);
 		}
 	return (line);
 }
+/*
+#include <fcntl.h>
+int main()
+{
+	int fd = open("get_next_line_utils.c", O_RDONLY);
+	char *status;
+
+	do
+	{
+		status = get_next_line(fd);
+		if(status != NULL)
+			printf("%s", status);
+	}while(status != NULL);
+	return 0;
+}
+*/
