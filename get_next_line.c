@@ -218,7 +218,6 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-//PROBLEM FREE NOT ALLOCATE WHEN SINGLE CHARACTER LIKE "\n"
 /*
 #include <fcntl.h>
 int main()
