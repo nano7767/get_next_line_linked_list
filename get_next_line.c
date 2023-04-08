@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/08 12:33:17 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/08 15:09:01 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,8 @@ void	free_stash(t_list **stash)
 	j = 0;
 	i = 0;
 	ptr = ft_lstlast(*stash);
+	if (ptr->content == NULL)
+		return ;
 	while (ptr->content[i]  && ptr->content[i] != '\n')
 		i++;
 	if (ptr->content  && ptr->content[i] == '\n')
@@ -91,11 +93,10 @@ void	add_to_stash(t_list **stash, char *buf, int read_size)
 		return ;
 	i = 0;
 	//the new node content is buf
-	while (read_size > 0)
+	while (i < read_size)
 	{
 		new_node->content[i] = buf[i];
 		i++; 
-		read_size--;
 	}
 	//null terminate new node
 	new_node->content[i] = '\0';
@@ -166,7 +167,7 @@ char	*get_next_line(int fd)
 		return (NULL);
 	line = NULL;
 	read_size = 0;
-	//loop until end of file (break when new line character found)
+	//loop (break when end of file or when new line character found)
 	while (1)
 	{
 		//allocate memory for buf
@@ -175,9 +176,16 @@ char	*get_next_line(int fd)
 			return (NULL);
 		//read continuously
 		read_size = read(fd, buf, BUFFER_SIZE);
+		//if empty file or invalid file
+		if ((stash == NULL && read_size == 0) || read_size == -1)
+		{
+			free(buf);
+			return (NULL);
+		}
 		//if end of file
 		if (read_size <= 0 && stash != NULL)
 		{
+			//DO I NEED FREE?
 			free(buf);
 			//extract line from stash
 			line = extract_line(stash);
@@ -185,9 +193,6 @@ char	*get_next_line(int fd)
 			//break off loop to return line
 			break ;
 		}
-		//if empty file, return
-		else if (read_size <= 0 && stash == NULL)
-			return (NULL);
 		//null terminate buf
 		buf[read_size] = '\0';
 		//store buf to stash as linked list
@@ -218,6 +223,7 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
+//PROBLEM FREE NOT ALLOCATE WHEN SINGLE CHARACTER LIKE "\n"
 /*
 #include <fcntl.h>
 int main()
