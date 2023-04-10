@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/08 15:09:01 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/08 16:08:50 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ void	free_stash(t_list **stash)
 	while (ptr->content[i]  && ptr->content[i] != '\n')
 		i++;
 	if (ptr->content  && ptr->content[i] == '\n')
-	i++;
+		i++;
 	tmp->content = (char *)malloc(sizeof(char) * ((ft_strlen(ptr->content) - i) + 1));
 	if (tmp->content == NULL)
 		return ;
@@ -108,30 +108,19 @@ void	add_to_stash(t_list **stash, char *buf, int read_size)
 char	*extract_line(t_list *stash)
 {
 	char	*line;
-	//int	line_len;
 	int	i;
 	int	j;
 	t_list	*ptr;
 
 	//allocate size enough for stash
-	/*
-	line_len = BUFFER_SIZE * (ft_lstsize(stash) - 1) + last_node_len(stash);
-	line = (char *)malloc(sizeof(char) * (line_len + 1));
-	*/
 	line = (char *)malloc(sizeof(char) * (total_node_len(stash) + 1));
 	if (line == NULL)
 		return (NULL);
 	i = 0;
-	j = 0;
 	ptr = stash;
 	while (ptr)
 	{
-		/*
-		//if end of line
-		if (ptr == NULL)
-			break ;
-		*/
-		//while the content of the node is not end
+		j = 0;
 		while (ptr->content[j])
 		{
 			//break if new line found
@@ -146,8 +135,7 @@ char	*extract_line(t_list *stash)
 			i++;
 			j++;
 		}
-		//reset j to 0 and go to next node
-		j = 0;
+		//go to next node
 		ptr = ptr->next;
 	}
 	//add null terminator to line and return it
@@ -183,14 +171,12 @@ char	*get_next_line(int fd)
 			return (NULL);
 		}
 		//if end of file
-		if (read_size <= 0 && stash != NULL)
+		if ((read_size == 0 && stash != NULL))
 		{
-			//DO I NEED FREE?
 			free(buf);
-			//extract line from stash
 			line = extract_line(stash);
 			clear_list(stash);
-			//break off loop to return line
+			stash = NULL;
 			break ;
 		}
 		//null terminate buf
@@ -223,12 +209,17 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-//PROBLEM FREE NOT ALLOCATE WHEN SINGLE CHARACTER LIKE "\n"
+/*PROBLEM WHEN NEW LINE AND TAB
+
+LIKE
+
+	THIS
+*/
 /*
 #include <fcntl.h>
 int main()
 {
-	int fd = open("get_next_line_utils.c", O_RDONLY);
+	int fd = open("test.txt", O_RDONLY);
 	char *status;
 
 	do
