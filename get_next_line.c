@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/10 17:05:38 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/13 14:49:16 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,9 @@ int	contain_nl(t_list *stash)
 	i = 0;
 	//only the latest node is relevant so pointer to last node
 	ptr = ft_lstlast(stash);
-	//if found new line return 1 otherwise return 0
 	while (ptr->content[i])
 	{
+		//if found new line return 1 otherwise return 0
 		if (ptr->content[i] == '\n')
 			return (1);
 		i++;
@@ -57,21 +57,16 @@ void	free_stash(t_list **stash)
 	ptr = ft_lstlast(*stash);
 	if (ptr->content == NULL)
 		return ;
-	while (ptr->content[i] && ptr->content[i] != '\n')
+	while (ptr->content[i]  && ptr->content[i] != '\n')
 		i++;
-	//get position after '\n' finishes
-	while (ptr->content && ptr->content[i] == '\n')
+	if (ptr->content  && ptr->content[i] == '\n')
 		i++;
 	tmp->content = (char *)malloc(sizeof(char) * ((ft_strlen(ptr->content) - i) + 1));
 	if (tmp->content == NULL)
 		return ;
 	//the content of tmp node is now the content of the last node after new line
 	while (ptr->content[i])
-	{
-		tmp->content[j] = ptr->content[i];
-		j++;
-		i++;
-	}
+		tmp->content[j++] = ptr->content[i++];
 	//null terminate tmp
 	tmp->content[j] = '\0';
 	//free stash and copy tmp to stash
@@ -115,14 +110,12 @@ char	*extract_line(t_list *stash)
 	char	*line;
 	int	i;
 	int	j;
-	int	exit;
 	t_list	*ptr;
 
 	//allocate size enough for stash
 	line = (char *)malloc(sizeof(char) * (total_node_len(stash) + 1));
 	if (line == NULL)
 		return (NULL);
-	exit = 0;
 	i = 0;
 	ptr = stash;
 	while (ptr)
@@ -130,15 +123,11 @@ char	*extract_line(t_list *stash)
 		j = 0;
 		while (ptr->content[j])
 		{
-			//break after '\n' finish
+			//break if new line found
 			if (ptr->content[j] == '\n')
-			{
-				while (ptr->content[j] == '\n')
-				{
-					line[i] = ptr->content[j];
-					i++;
-					j++;
-				}
+			{	
+				line[i] = 'n';
+				i++;
 				line[i] = '\0';
 				return (line);
 			}
@@ -182,8 +171,8 @@ char	*get_next_line(int fd)
 			free(buf);
 			return (NULL);
 		}
-		//if end of file reached and '\n' is not in stash
-		if ((read_size == 0 && stash != NULL && contain_nl(stash) == 0))
+		//if end of file
+		if ((read_size == 0 && stash != NULL))
 		{
 			free(buf);
 			line = extract_line(stash);
@@ -197,7 +186,7 @@ char	*get_next_line(int fd)
 		add_to_stash(&stash, buf, read_size);
 		//free buf after storing
 		free(buf);
-		if (contain_nl(ft_lstlast(stash)) == 1)
+		if (contain_nl(stash) == 1)
 		{
 			//if new line character is found, extract line from stash up to '\n'
 			line = extract_line(stash);
@@ -207,21 +196,26 @@ char	*get_next_line(int fd)
 			break ;
 		}
 	}
-	if (line[0] == '\0')
-	{
-		if (stash != NULL)
+		if (line[0] == '\0')
 		{
-			clear_list(stash);
-			stash = NULL;
+			if (stash != NULL)
+			{
+				clear_list(stash);
+				stash = NULL;
+			}
+			free(line);
+			line = NULL;
+			return (NULL);
 		}
-		free(line);
-		line = NULL;
-		return (NULL);
-	}
 	return (line);
 }
-//PROBLEM: IF BUFFER_SIZE IS NOT 1 AFTER EXTRACTING 3 LINES WITH DOUBLE '\n' THE NEXT LINE BECOMES TRIPLE '\n'
-//CLEAR LIST BEFORE '\n' ONLY
+
+/*PROBLEM WHEN NEW LINE AND TAB
+
+LIKE
+
+	THIS
+*/
 
 #include <fcntl.h>
 int main()
