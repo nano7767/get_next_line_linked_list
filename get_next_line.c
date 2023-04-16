@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/13 14:49:16 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/16 16:24:36 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,22 +19,26 @@
 #include <unistd.h>
 #include "get_next_line.h"
 
+
 //if last node of stash contains '\n'
 int	contain_nl(t_list *stash)
 {
 	int			i;
 	t_list	*ptr;
 
-
-	i = 0;
 	//only the latest node is relevant so pointer to last node
-	ptr = ft_lstlast(stash);
-	while (ptr->content[i])
+	ptr = stash;
+	while (ptr)
 	{
-		//if found new line return 1 otherwise return 0
-		if (ptr->content[i] == '\n')
-			return (1);
-		i++;
+		i = 0;
+		while (ptr->content[i])
+		{
+			//if found new line return 1 otherwise return 0
+			if (ptr->content[i] == '\n')
+				return (1);
+			i++;
+		}
+		ptr = ptr->next;
 	}
 	return (0);
 }
@@ -53,27 +57,60 @@ void	free_stash(t_list **stash)
 		return ;
 	tmp->next = NULL;
 	j = 0;
-	i = 0;
-	ptr = ft_lstlast(*stash);
-	if (ptr->content == NULL)
-		return ;
-	while (ptr->content[i]  && ptr->content[i] != '\n')
+	ptr = *stash;
+	//free until including '\n' then the rest of stash after '\n' is copied
+	while (ptr && ptr->content && ptr->content[i] && ptr->content[i] != '\n')
+	{
+		if (ptr->content[i] == '\0')
+		{
+			ptr = ptr->next;
+			j = j + i;
+			i = 0;
+		}
+		else if (ptr->content[i] == '\n')
+		{
+			j = j + i;
+		}
 		i++;
-	if (ptr->content  && ptr->content[i] == '\n')
-		i++;
-	tmp->content = (char *)malloc(sizeof(char) * ((ft_strlen(ptr->content) - i) + 1));
+	}
+	/*
+	while (ptr)
+	{
+		i = 0;
+		while (ptr->content[i] && ptr->content[i] != '\n')
+			i++;
+		if (ptr->content && ptr->content[i] == '\n')
+		{
+			i++;
+			j = j + i;
+			break;
+		}
+		j = j + i;
+		ptr = ptr->next;
+	}
+	*/
+	tmp->content = (char *)malloc(sizeof(char) * ((total_node_len(*stash) - j) + 1));	
 	if (tmp->content == NULL)
 		return ;
+	i = 0;
 	//the content of tmp node is now the content of the last node after new line
-	while (ptr->content[i])
-		tmp->content[j++] = ptr->content[i++];
+	while (ptr)
+	{		
+		while (ptr->content[j])
+		{
+			tmp->content[i] = ptr->content[j];
+			i++;
+			j++;
+		}
+		j = 0;
+		ptr = ptr->next;
+	}
 	//null terminate tmp
-	tmp->content[j] = '\0';
+	tmp->content[i] = '\0';
 	//free stash and copy tmp to stash
 	clear_list(*stash);
 	*stash = tmp;
 }
-
 //add content from *buf to stash
 void	add_to_stash(t_list **stash, char *buf, int read_size)
 {
@@ -126,7 +163,7 @@ char	*extract_line(t_list *stash)
 			//break if new line found
 			if (ptr->content[j] == '\n')
 			{	
-				line[i] = 'n';
+				line[i] = ptr->content[j];
 				i++;
 				line[i] = '\0';
 				return (line);
@@ -172,7 +209,7 @@ char	*get_next_line(int fd)
 			return (NULL);
 		}
 		//if end of file
-		if ((read_size == 0 && stash != NULL))
+		if ((read_size == 0 && stash != NULL && contain_nl(stash) == 0))
 		{
 			free(buf);
 			line = extract_line(stash);
@@ -196,6 +233,7 @@ char	*get_next_line(int fd)
 			break ;
 		}
 	}
+		
 		if (line[0] == '\0')
 		{
 			if (stash != NULL)
@@ -207,6 +245,7 @@ char	*get_next_line(int fd)
 			line = NULL;
 			return (NULL);
 		}
+
 	return (line);
 }
 
@@ -220,9 +259,19 @@ LIKE
 #include <fcntl.h>
 int main()
 {
-	int fd = open("test.txt", O_RDONLY);
+	int fd = open("test2.txt", O_RDONLY);
 	char *status;
+	int	i;
 
+	i = 0;
+	status = "a";
+	while(status != NULL)
+	{
+		status = get_next_line(fd);
+		printf("%i %s", i, status);
+		i++;
+	}
+/*
 	do
 	{
 		status = get_next_line(fd);
@@ -230,5 +279,6 @@ int main()
 			printf("%s", status);
 	}while(status != NULL);
 	return 0;
+*/
 }
 
