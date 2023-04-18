@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/18 13:18:53 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/18 17:40:27 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,36 +58,25 @@ void	free_stash(t_list **stash)
 	tmp->next = NULL;
 	j = 0;
 	ptr = *stash;
-	//free until including '\n' then the rest of stash after '\n' is copied
-	while (ptr && ptr->content[i] != '\n')
+	//search the whole stash for '\n' and anything after '\n' is kept
+	while (ptr && ptr->content[i] && ptr->content[i] != '\n')
 	{
-		i++;
-		j++;
 		if (ptr->content[i] == '\0')
 		{
 			ptr = ptr->next;
 			i = 0;
 		}
+		i++;
+		j++;
 	}
-	j++;
-	/*
-	while (ptr)
+	if (ptr->content[i] == '\n' && ptr->content[j])
+		j++;
+	else
 	{
-		i = 0;
-		while (ptr->content[i] && ptr->content[i] != '\n')
-		{	
-			i++;
-			j++;
-		}
-		if (ptr->content && ptr->content[i] == '\n')
-		{
-			i++;
-			j++;
-			break;
-		}
-		ptr = ptr->next;
+		clear_list(*stash);
+		*stash = NULL;
+		return ;
 	}
-	*/
 	tmp->content = (char *)malloc(sizeof(char) * ((total_node_len(*stash) - j) + 1));	
 	if (tmp->content == NULL)
 		return ;
@@ -188,7 +177,7 @@ char	*get_next_line(int fd)
 	int	read_size;
 
 	//if invalid file or BUFFER_SIZE return NULL
-	if (fd < 0 || fd == 0 || BUFFER_SIZE <= 0 || read(fd, &line, 0) < 0)
+	if (fd < 0 || fd == 0 || BUFFER_SIZE <= 0) //|| read(fd, &line, 0) < 0)
 		return (NULL);
 	line = NULL;
 	read_size = 0;
@@ -224,6 +213,7 @@ char	*get_next_line(int fd)
 		free(buf);
 		if (contain_nl(stash) == 1)
 		{
+			printf("???");
 			//if new line character is found, extract line from stash up to '\n'
 			line = extract_line(stash);
 			//free stash until after '\n'
@@ -258,7 +248,7 @@ LIKE
 #include <fcntl.h>
 int main()
 {
-	int fd = open("test2.txt", O_RDONLY);
+	int fd = open("test.txt", O_RDONLY);
 	char *status;
 	int	i;
 
@@ -280,4 +270,5 @@ int main()
 			printf("%s", status);
 	}while(status != NULL);
 	return 0;
+}
 */
