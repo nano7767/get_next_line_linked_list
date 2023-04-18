@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/16 16:24:36 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/18 13:18:53 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,33 +59,32 @@ void	free_stash(t_list **stash)
 	j = 0;
 	ptr = *stash;
 	//free until including '\n' then the rest of stash after '\n' is copied
-	while (ptr && ptr->content && ptr->content[i] && ptr->content[i] != '\n')
+	while (ptr && ptr->content[i] != '\n')
 	{
+		i++;
+		j++;
 		if (ptr->content[i] == '\0')
 		{
 			ptr = ptr->next;
-			j = j + i;
 			i = 0;
 		}
-		else if (ptr->content[i] == '\n')
-		{
-			j = j + i;
-		}
-		i++;
 	}
+	j++;
 	/*
 	while (ptr)
 	{
 		i = 0;
 		while (ptr->content[i] && ptr->content[i] != '\n')
+		{	
 			i++;
+			j++;
+		}
 		if (ptr->content && ptr->content[i] == '\n')
 		{
 			i++;
-			j = j + i;
+			j++;
 			break;
 		}
-		j = j + i;
 		ptr = ptr->next;
 	}
 	*/
@@ -271,6 +270,8 @@ int main()
 		printf("%i %s", i, status);
 		i++;
 	}
+}
+
 /*
 	do
 	{
@@ -280,5 +281,3 @@ int main()
 	}while(status != NULL);
 	return 0;
 */
-}
-
