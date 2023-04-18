@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 15:40:08 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/02 13:45:31 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/16 15:23:14 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 # include <unistd.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 5
+#  define BUFFER_SIZE 1
 # endif
 
 typedef struct s_list
@@ -34,8 +34,11 @@ char	*ft_strchr(const char *s, int c);
 char	*ft_strjoin(char const *s1, char const *s2);
 void	*ft_calloc(size_t count, size_t size);
 char	*ft_strdup(const char *s1);
-void	clear_list(t_list **list);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
+t_list	*ft_lstnew(void *content);
+void	clear_list(t_list *list);
 int	ft_lstsize(t_list *lst);
+int	total_node_len(t_list *lst);
 int	last_node_len(t_list *lst);
 t_list	*ft_lstlast(t_list *lst);
 void	ft_lstadd_back(t_list **lst, t_list *new);
