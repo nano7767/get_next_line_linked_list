@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/22 11:27:17 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/02 13:57:30 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/10 15:27:31 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,19 +137,19 @@ char	*ft_strdup(const char *s1)
 	return (dest);
 }
 
-void	clear_list(t_list **list)
+void	clear_list(t_list *list)
 {
-	t_list	*ptr;
-	t_list	*tmp;
+	t_list	*current;
+	t_list	*temp;
 
-	ptr = *list;
-	while (ptr != NULL)
+	current = list;
+	while (current)
 	{
-		tmp = ptr->next;
-		free(ptr);
-		ptr = tmp;
+		free(current->content);
+		temp = current->next;
+		free(current);
+		current = temp;
 	}
-	*list = NULL;
 }
 
 int	ft_lstsize(t_list *lst)
@@ -167,6 +167,27 @@ int	ft_lstsize(t_list *lst)
 	return (len);
 }
 
+int	total_node_len(t_list *lst)
+{
+	int	i;
+	int	len;
+	t_list *ptr;
+
+	ptr = lst;
+	len = 0;
+	while (ptr)
+	{
+		i = 0;
+		while (ptr->content[i])
+		{
+			i++;
+			len++;
+		}
+		ptr = ptr->next;
+	}
+	return (len);
+}
+
 int	last_node_len(t_list *lst)
 {
 	int		len;
@@ -175,7 +196,15 @@ int	last_node_len(t_list *lst)
 	len = 0;
 	ptr = ft_lstlast(lst);
 	while (ptr->content[len])
+	{
+		if (ptr->content[len] == '\n')
+		{
+			len++;
+			break;
+		}
 		len++;
+	}
+	len++;
 	return (len);
 }
 
@@ -212,4 +241,45 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 	}
 	ptr = ft_lstlast(*lst);
 	ptr->next = new;
+}
+
+t_list	*ft_lstnew(void *content)
+{
+	t_list	*new_node;
+
+	new_node = (t_list *)malloc(sizeof(t_list));
+	if (new_node == NULL)
+		return (NULL);
+	new_node->content = content;
+	new_node->next = NULL;
+	return (new_node);
+}
+
+char	*ft_substr(char const *s, unsigned int start, size_t len)
+{
+	size_t	i;
+	size_t	current;
+	char	*sub;
+	size_t	new_len;
+
+	if (s == NULL)
+		return (NULL);
+	else if (ft_strlen(s) <= start || len == 0)
+		return (ft_strdup(""));
+	i = 0;
+	current = start;
+	new_len = len;
+	if (len > ft_strlen(&s[start]))
+		new_len = ft_strlen(&s[start]);
+	sub = (char *)malloc((new_len + 1) * sizeof(char));
+	if (sub == NULL)
+		return (NULL);
+	while (i < new_len && current < new_len + current)
+	{
+		current = start + i;
+		sub[i] = s[current];
+		i++;
+	}
+	sub[i] = '\0';
+	return (sub);
 }
