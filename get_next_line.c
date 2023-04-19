@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/18 17:40:27 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/19 16:21:47 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,15 @@ void	free_stash(t_list **stash)
 	t_list *ptr;
 	int	i;
 	int	j;
-
 	//make new tmp node
 	tmp = malloc(sizeof(t_list));
 	if (stash == NULL || tmp == NULL)
 		return ;
 	tmp->next = NULL;
-	j = 0;
+	i = 0;
 	ptr = *stash;
 	//search the whole stash for '\n' and anything after '\n' is kept
-	while (ptr && ptr->content[i] && ptr->content[i] != '\n')
+	while (ptr && ptr->content[i] != '\0' && ptr->content[i] != '\n')
 	{
 		if (ptr->content[i] == '\0')
 		{
@@ -67,38 +66,49 @@ void	free_stash(t_list **stash)
 			i = 0;
 		}
 		i++;
-		j++;
 	}
-	if (ptr->content[i] == '\n' && ptr->content[j])
-		j++;
-	else
+	if (ptr->content[i] == '\0' && BUFFER_SIZE == 1)
 	{
 		clear_list(*stash);
 		*stash = NULL;
+		free(tmp);
 		return ;
 	}
-	tmp->content = (char *)malloc(sizeof(char) * ((total_node_len(*stash) - j) + 1));	
+
+	if (ptr->content[i] == '\n' && ptr->content[i])
+	{
+		if (ptr->content[i + 1] == '\0')
+		{
+			ptr = ptr->next;
+			i = 0;
+		}
+		else
+			i++;
+	}
+	//PROBLEM IS READ IS AHEAD THEREFORE STASH CONTAINS UP TO NEXT TURN OF EXTRACT LINE, WHEN WE CLEAR LIST IT CLEARS AHEAD TO THE NEXT TURN
+	tmp->content = (char *)malloc(sizeof(char) * ((total_node_len(*stash) - i) + 1));	
 	if (tmp->content == NULL)
 		return ;
-	i = 0;
 	//the content of tmp node is now the content of the last node after new line
+	j = 0;
 	while (ptr)
-	{		
-		while (ptr->content[j])
+	{
+		while (ptr->content[i])
 		{
-			tmp->content[i] = ptr->content[j];
+			tmp->content[j] = ptr->content[i];
 			i++;
 			j++;
 		}
-		j = 0;
 		ptr = ptr->next;
+		i = 0;
 	}
 	//null terminate tmp
-	tmp->content[i] = '\0';
+	tmp->content[j] = '\0';
 	//free stash and copy tmp to stash
 	clear_list(*stash);
 	*stash = tmp;
 }
+
 //add content from *buf to stash
 void	add_to_stash(t_list **stash, char *buf, int read_size)
 {
@@ -132,7 +142,7 @@ void	add_to_stash(t_list **stash, char *buf, int read_size)
 //extract_line function extracts line upto '\n' if there is one
 char	*extract_line(t_list *stash)
 {
-	char	*line;
+	char	*line = NULL;
 	int	i;
 	int	j;
 	t_list	*ptr;
@@ -213,7 +223,6 @@ char	*get_next_line(int fd)
 		free(buf);
 		if (contain_nl(stash) == 1)
 		{
-			printf("???");
 			//if new line character is found, extract line from stash up to '\n'
 			line = extract_line(stash);
 			//free stash until after '\n'
