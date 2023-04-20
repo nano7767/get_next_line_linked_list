@@ -60,6 +60,8 @@ void	free_stash(t_list **stash)
 	//search the whole stash for '\n' and anything after '\n' is kept
 	while (ptr && ptr->content[i] != '\n')
 	{
+		if (BUFFER_SIZE == 1 && ptr->content[i] == '\0')
+			break ;
 		if (ptr->content[i] == '\0')
 		{
 			ptr = ptr->next;
@@ -74,7 +76,6 @@ void	free_stash(t_list **stash)
 		free(tmp);
 		return ;
 	}
-
 	if (ptr->content[i] == '\n' && ptr->content[i])
 	{
 		if (ptr->content[i + 1] == '\0')
