@@ -58,7 +58,7 @@ void	free_stash(t_list **stash)
 	i = 0;
 	ptr = *stash;
 	//search the whole stash for '\n' and anything after '\n' is kept
-	while (ptr && ptr->content[i] != '\0' && ptr->content[i] != '\n')
+	while (ptr && ptr->content[i] != '\n')
 	{
 		if (ptr->content[i] == '\0')
 		{
@@ -112,12 +112,10 @@ void	free_stash(t_list **stash)
 //add content from *buf to stash
 void	add_to_stash(t_list **stash, char *buf, int read_size)
 {
-	t_list	*ptr;
 	t_list	*new_node;
 	int	i;
 
 	//pointer to last node of stash since we want to append buf to it
-	ptr = ft_lstlast(*stash);
 	//make a new node
 	new_node = malloc(sizeof(t_list));
 	if (new_node == NULL)
@@ -243,7 +241,6 @@ char	*get_next_line(int fd)
 			line = NULL;
 			return (NULL);
 		}
-
 	return (line);
 }
 
