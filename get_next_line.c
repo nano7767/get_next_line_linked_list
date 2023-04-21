@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/19 16:21:47 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/21 12:13:17 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	free_stash(t_list **stash)
 		if (ptr->content[i] == '\0')
 		{
 			ptr = ptr->next;
-			i = 0;
+			i = -1;
 		}
 		i++;
 	}
@@ -76,6 +76,19 @@ void	free_stash(t_list **stash)
 		free(tmp);
 		return ;
 	}
+
+	if (ptr->content[i] == '\n')
+		i++;
+    /*
+    else if (ptr->content[i] == '\0')
+    {
+        clear_list(*stash);
+        *stash = NULL;
+        free(tmp);
+        return ;
+    }
+    */
+	/*
 	if (ptr->content[i] == '\n' && ptr->content[i])
 	{
 		if (ptr->content[i + 1] == '\0')
@@ -86,6 +99,7 @@ void	free_stash(t_list **stash)
 		else
 			i++;
 	}
+	*/
 	//PROBLEM IS READ IS AHEAD THEREFORE STASH CONTAINS UP TO NEXT TURN OF EXTRACT LINE, WHEN WE CLEAR LIST IT CLEARS AHEAD TO THE NEXT TURN
 	tmp->content = (char *)malloc(sizeof(char) * ((total_node_len(*stash) - i) + 1));	
 	if (tmp->content == NULL)
@@ -186,7 +200,7 @@ char	*get_next_line(int fd)
 	int	read_size;
 
 	//if invalid file or BUFFER_SIZE return NULL
-	if (fd < 0 || fd == 0 || BUFFER_SIZE <= 0) //|| read(fd, &line, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0) //|| read(fd, &line, 0) < 0)
 		return (NULL);
 	line = NULL;
 	read_size = 0;
@@ -251,11 +265,11 @@ LIKE
 
 	THIS
 */
-
+/*
 #include <fcntl.h>
 int main()
 {
-	int fd = open("test.txt", O_RDONLY);
+	int fd = open("test2.txt", O_RDONLY);
 	char *status;
 	int	i;
 
@@ -268,7 +282,7 @@ int main()
 		i++;
 	}
 }
-
+*/
 /*
 	do
 	{
