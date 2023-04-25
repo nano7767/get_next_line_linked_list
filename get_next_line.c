@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/25 17:19:58 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/25 18:20:04 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,12 +70,15 @@ void	add_to_stash(t_list **stash, char *buf, int read_size)
 	int		i;
 
 	new_node = malloc(sizeof(t_list));
-	if (new_node == NULL)
+	new_node->content = (char *)malloc((sizeof(char) * read_size) + 1);
+	if (new_node->content == NULL || new_node == NULL)
 		return ;
 	new_node->next = NULL;
-	new_node->content = (char *)malloc((sizeof(char) * read_size) + 1);
-	if (new_node->content == NULL)
-		return ;
+	/*
+	new_node = malloc(sizeof(t_list));
+	new_node = generate_tmp(new_node, -read_size);
+	*/
+	buf[read_size] = '\0';
 	i = 0;
 	while (i < read_size)
 	{
@@ -142,7 +145,6 @@ char	*get_next_line(int fd)
 			stash = NULL;
 			break ;
 		}
-		buf[read_size] = '\0';
 		add_to_stash(&stash, buf, read_size);
 		free(buf);
 		if (contain_nl(stash) != 0)
