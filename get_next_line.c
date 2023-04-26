@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/25 18:20:04 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/26 17:02:55 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,15 +40,12 @@ void	free_stash(t_list **stash)
 
 	i = 0;
 	ptr = *stash;
-	while (ptr && ptr->content[i] != '\n')
+	if (contain_nl(ptr) == 0)
 	{
-		if (ptr->content[i] == '\0')
-		{	
-			ptr = ptr->next;
-			i = -1;
-		}
-		i++;
+		clear_list(stash);
+		return ;
 	}
+	advance_to_nl(&ptr, &i);
 	tmp = generate_tmp(*stash, ++i);
 	j = 0;
 	while (ptr)
@@ -59,7 +56,7 @@ void	free_stash(t_list **stash)
 		i = 0;
 	}
 	tmp->content[j] = '\0';
-	clear_list(*stash);
+	clear_list(stash);
 	*stash = tmp;
 }
 
@@ -67,25 +64,19 @@ void	add_to_stash(t_list **stash, char *buf, int read_size)
 {
 	t_list	*ptr;
 	t_list	*new_node;
-	int		i;
 
 	new_node = malloc(sizeof(t_list));
-	new_node->content = (char *)malloc((sizeof(char) * read_size) + 1);
-	if (new_node->content == NULL || new_node == NULL)
+	if (new_node == NULL)
 		return ;
 	new_node->next = NULL;
-	/*
-	new_node = malloc(sizeof(t_list));
-	new_node = generate_tmp(new_node, -read_size);
-	*/
+	new_node->content = (char *)malloc((sizeof(char) * read_size) + 1);
+	if (new_node->content == NULL)
+		return ;
 	buf[read_size] = '\0';
-	i = 0;
-	while (i < read_size)
-	{
-		new_node->content[i] = buf[i];
-		i++;
-	}
-	new_node->content[i] = '\0';
+	new_node->content[read_size] = '\0';
+	while (read_size--)
+		new_node->content[read_size] = buf[read_size];
+	free(buf);
 	if (*stash == NULL)
 	{
 		*stash = new_node;
@@ -103,7 +94,7 @@ char	*extract_line(t_list *stash)
 	t_list		*ptr;
 
 	i = 0;
-	line = (char *)malloc(sizeof(char) * (total_node_len(stash) + 1));
+	line = (char *)malloc(sizeof(char) * (allnodelen(stash) + 1));
 	ptr = stash;
 	while (ptr)
 	{
@@ -140,20 +131,14 @@ char	*get_next_line(int fd)
 		if (read_size == 0 && stash && contain_nl(stash) == 0)
 		{
 			free(buf);
-			line = extract_line(stash);
-			clear_list(stash);
-			stash = NULL;
 			break ;
 		}
 		add_to_stash(&stash, buf, read_size);
-		free(buf);
 		if (contain_nl(stash) != 0)
-		{
-			line = extract_line(stash);
-			free_stash(&stash);
 			break ;
-		}
 	}
+	line = extract_line(stash);
+	free_stash(&stash);
 	if (line[0] == '\0')
 		return (free(line), NULL);
 	return (line);
@@ -166,7 +151,6 @@ char	*get_next_line(int fd)
 	char			*buf;
 	char			*line = NULL;
 	int				read_size;
-
 	while (BUFFER_SIZE <= 0 && buf && read_size != -1)
 	{
 		buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
@@ -201,7 +185,6 @@ int main()
 	int fd = open("test2.txt", O_RDONLY);
 	char *status;
 	int	i;
-
 	i = 0;
 	status = "a";
 	while(status != NULL)
