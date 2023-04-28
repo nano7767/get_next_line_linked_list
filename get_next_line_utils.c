@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/22 11:27:17 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/26 15:19:07 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/28 14:10:04 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	allnodelen(t_list *lst)
 	ptr = lst;
 	len = 0;
 	while (ptr)
-	{
+	{	
 		i = 0;
 		while (ptr->content[i])
 		{
@@ -73,7 +73,7 @@ int	allnodelen(t_list *lst)
 	return (len);
 }
 
-t_list	*generate_tmp(t_list *stash, int i)
+t_list	*generate_tmp(int i)
 {
 	t_list	*tmp;
 
@@ -81,21 +81,31 @@ t_list	*generate_tmp(t_list *stash, int i)
 	if (tmp == NULL)
 		return (NULL);
 	tmp->next = NULL;
-	tmp->content = (char *)malloc(sizeof(char) * ((allnodelen(stash) - i) + 1));
+	tmp->content = (char *)malloc(sizeof(char) * (i + 1));
 	if (tmp->content == NULL)
 		return (NULL);
 	return (tmp);
 }
 
-void	advance_to_nl(t_list **ptr, int *i)
+int	advance_to_nl(t_list **ptr)
 {
-	while (*ptr && (*ptr)->content[*i] != '\n')
+	int	i;
+
+	if (BUFFER_SIZE == 1)
 	{
-		if ((*ptr)->content[*i] == '\0')
+		while (*ptr && (*ptr)->content[0] != '\n')
+			*ptr = (*ptr)->next;
+		return (0);
+	}
+	i = 0;
+	while (*ptr && (*ptr)->content[i] != '\n')
+	{
+		if ((*ptr)->content[i] == '\0')
 		{
 			*ptr = (*ptr)->next;
-			*i = -1;
+			i = -1;
 		}
-		(*i)++;
+		i++;
 	}
+	return (i);
 }

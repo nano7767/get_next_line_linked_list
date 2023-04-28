@@ -6,15 +6,14 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/26 15:40:08 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/26 17:02:45 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/28 14:42:07 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
-
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 42
+#  define BUFFER_SIZE 43
 # endif
 
 # include <stdio.h>
@@ -35,7 +34,7 @@ char	*extract_line(t_list *stash);
 void	clear_list(t_list **list);
 int		allnodelen(t_list *lst);
 t_list	*ft_lstlast(t_list *lst);
-t_list	*generate_tmp(t_list *stash, int i);
-void	advance_to_nl(t_list **ptr, int *i);
+t_list	*generate_tmp(int i);
+int		advance_to_nl(t_list **ptr);
 
 #endif
