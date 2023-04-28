@@ -6,7 +6,7 @@
 /*   By: svikornv <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 17:02:52 by svikornv          #+#    #+#             */
-/*   Updated: 2023/04/26 17:02:55 by svikornv         ###   ########.fr       */
+/*   Updated: 2023/04/28 15:35:58 by svikornv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,14 @@ void	free_stash(t_list **stash)
 	int			i;
 	int			j;
 
-	i = 0;
-	ptr = *stash;
-	if (contain_nl(ptr) == 0)
+	if (contain_nl(*stash) == 0)
 	{
 		clear_list(stash);
 		return ;
 	}
-	advance_to_nl(&ptr, &i);
-	tmp = generate_tmp(*stash, ++i);
+	ptr = *stash;
+	i = advance_to_nl(&ptr);
+	tmp = generate_tmp(allnodelen(*stash) - ++i);
 	j = 0;
 	while (ptr)
 	{
@@ -122,10 +121,10 @@ char	*get_next_line(int fd)
 	char			*line;
 	int				read_size;
 
-	while (1)
+	while (contain_nl(stash) == 0)
 	{
-		buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		read_size = read(fd, buf, BUFFER_SIZE);
+		buf = malloc(sizeof(char) * (BUFFER_SIZE + 1 + (1 / BUFFER_SIZE)));
+		read_size = read(fd, buf, BUFFER_SIZE + (1 / BUFFER_SIZE));
 		if ((!stash && !read_size) || read_size == -1 || BUFFER_SIZE <= 0)
 			return (free(buf), NULL);
 		if (read_size == 0 && stash && contain_nl(stash) == 0)
@@ -134,8 +133,6 @@ char	*get_next_line(int fd)
 			break ;
 		}
 		add_to_stash(&stash, buf, read_size);
-		if (contain_nl(stash) != 0)
-			break ;
 	}
 	line = extract_line(stash);
 	free_stash(&stash);
@@ -143,41 +140,6 @@ char	*get_next_line(int fd)
 		return (free(line), NULL);
 	return (line);
 }
-
-/*
-char	*get_next_line(int fd)
-{
-	static t_list	*stash = NULL;
-	char			*buf;
-	char			*line = NULL;
-	int				read_size;
-	while (BUFFER_SIZE <= 0 && buf && read_size != -1)
-	{
-		buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		read_size = read(fd, buf, BUFFER_SIZE);
-		if (read_size == 0 && stash != NULL && contain_nl(stash) == 0)
-		{
-			free(buf);
-			line = extract_line(stash);
-			clear_list(stash);
-			stash = NULL;
-			break ;
-		}
-		buf[read_size] = '\0';
-		add_to_stash(&stash, buf, read_size);
-		free(buf);
-		if (contain_nl(stash) != 0)
-		{
-			line = extract_line(stash);
-			free_stash(&stash);
-			break ;
-		}
-	}
-	if (line && line[0] == '\0')
-		return (free(line), NULL);
-	return (line);
-}
-*/
 /*
 #include <fcntl.h>
 int main()
